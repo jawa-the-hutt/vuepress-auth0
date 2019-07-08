@@ -80,8 +80,6 @@ var AuthService = (function (_super) {
     AuthService.prototype.setSession = function (authResult) {
         this.idToken = authResult.idToken;
         this.profile = authResult.idTokenPayload;
-        console.log('this.profile - ', this.profile);
-        console.log('authResult - ', authResult);
         if (this.profile && this.profile.exp) {
             this.expiresIn = (this.profile.exp * 1000) + Date.now();
             localStorage.setItem(localStorageKey, "true");
