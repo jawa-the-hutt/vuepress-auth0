@@ -141,7 +141,7 @@ module.exports = {
 
 ## Custom Unauthorized page
 
-You can add a custom unauthorized page
+You can add a custom unauthorized page by simply adding a markdown file in the same folder as your default page.  Call the file whatever you want, but simplier is better.  '`unauthorized.md`' would be a good suggestion.  Then in the plugin config, add a parameter named `unauthorizedRoute` and set the value to `/unauthorized`.  This value can be different, but must match the filename and have the `/` prefixed to it.  For example, if your markdown file is called '`go-away-right-now.md`', then your value would be '`/go-away-right-now`'.
 
 
 ## Other Config items
