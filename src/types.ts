@@ -1,6 +1,5 @@
 import { Auth0UserProfile } from "auth0-js";
 
-
 export interface pluginOptions {
   domain: string;
   namespace?: string;
@@ -10,6 +9,7 @@ export interface pluginOptions {
   responseType?: string;
   allRoutes?: boolean;
   roles?: string[];
+  unauthorizedRoute?: string;
 }
 
 export interface customState {

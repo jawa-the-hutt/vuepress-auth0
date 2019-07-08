@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-
-
 import { Auth0DecodedHash, WebAuth, AuthorizeOptions } from "auth0-js";
 import { EventEmitter } from "events";
 import { pluginOptions, customState, ExtendedAuth0UserProfile } from './types';
@@ -16,7 +14,6 @@ export default class AuthService extends EventEmitter {
   private idToken!: string | undefined;
   public profile!: ExtendedAuth0UserProfile | undefined;
   private expiresIn!: number;
-  // // private namespace!: string;
 
   constructor(options: pluginOptions, router: VueRouter) {
     super();
@@ -30,7 +27,6 @@ export default class AuthService extends EventEmitter {
     this.idToken = undefined;
     this.profile = undefined;
     this.expiresIn = 0;
-    // // this.namespace = options.namespace | undefined;
   }
 
   login(customState: customState): void {
@@ -65,8 +61,6 @@ export default class AuthService extends EventEmitter {
           reject(err);
         } else {
           if (authResult !== null) {
-            // // console.log('authResult - ', authResult)
-
             this.setSession(authResult);
             if (authResult.idToken) {
               resolve(authResult.idToken);
@@ -109,8 +103,6 @@ export default class AuthService extends EventEmitter {
   }
 
   setSession(authResult: Auth0DecodedHash): void {
-    // // console.log('starting setSession');
-
     this.idToken = authResult.idToken;
     this.profile = authResult.idTokenPayload;
     console.log('this.profile - ', this.profile);
@@ -123,11 +115,9 @@ export default class AuthService extends EventEmitter {
       localStorage.setItem(localStorageKey, "true");
       this.router.push(authResult.appState.target)
     } else if (authResult.expiresIn) {
-        // this.expiresIn = (this.profile.exp * 1000) + Date.now();  // new Date(this.profile.exp * 1000);
-        this.expiresIn = authResult.expiresIn * 1000 + Date.now();
-
-        localStorage.setItem(localStorageKey, "true");
-        this.router.push(authResult.appState.target)
+      this.expiresIn = authResult.expiresIn * 1000 + Date.now();
+      localStorage.setItem(localStorageKey, "true");
+      this.router.push(authResult.appState.target)
     } else {
 
     }

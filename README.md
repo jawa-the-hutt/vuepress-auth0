@@ -2,6 +2,8 @@
 
 Vuepress-Auth0 is a Vuepress plugin that will allow you to integreate the [Auth0](https://auth0.com/) Identity as a Service platform with Vuepress.  This will allow you to essentially secure all or parts of your Vuepress website behind user authentication.  You can even secure specific pages/routes based on user roles.
 
+If the user is not authorized to view a page/route, then by default they will be sent to the built in `/404` page. You can customize a page to show the user when they are not authorized.  Details are near the end of this document.  Also, it must be noted that currently there is **NOT** a way to hide pages in the Navbar or Sidebar if the user is not authorized to view them.  They will know the link is there, but when they try and navigate to it, they will get the unauthorized behavior just described.  Feel free to submit a PR if you have an idea on how this can happen.
+
 ## Quick Start
 
 ```shell
@@ -136,6 +138,11 @@ module.exports = {
   ]
 }
 ```
+
+## Custom Unauthorized page
+
+You can add a custom unauthorized page
+
 
 ## Other Config items
 

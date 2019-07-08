@@ -13,30 +13,19 @@ const isCallback = (route: Route, cbURL: string, base: string) => {
 }
 
 const routeGuard = (options: pluginOptions, siteData, router: VueRouter) => {
-  console.log('options - ', options)
   const authService: AuthService = new AuthService(options, router);
   const { base } = siteData;
   const { nav } = siteData.themeConfig;
-  // // console.log('nav - ', nav);
-
-  // // options = {
-  // //   allRoutes: true,
-  // //   ...options
-  // // }
-  // // console.log('options - ', options)
-
 
   return async (to, from, next) => {
     const authState: boolean = await authService.isAuthenticated();
     const link: string = to.path.replace(/\.[^/.]+$/, "");
-    // // console.log('link - ', link);
     const linkIndex: number = nav.findIndex((x) => x.link === link);
 
     let routeNeedsAuth: boolean = false;
     let userHasMatchingRoles: boolean = true;
     let profileRoles: string[] = [];
     const profile: any = await authService.profile;
-    // console.log('profile - ', profile);
 
     if (profile && profile[options.namespace + 'roles']) {
       profileRoles = profile[options.namespace + 'roles']
@@ -50,16 +39,11 @@ const routeGuard = (options: pluginOptions, siteData, router: VueRouter) => {
         // Determine if user uas matching roles for the route. If not, they will not be
         // allowed to navigate to the route
         if(!options.allRoutes && navConfig.meta.roles && navConfig.meta.roles.length > 0 && profileRoles.length > 0) {
-          // const navConfigSet = new Set(navConfig.meta.roles);
-          // const profileRolesSet = new Set(profileRoles);
-          // // const intersection = new Set([...navConfigSet].filter(x => profileRolesSet.has(x)))
-
-          const matchingRoles: string[] = navConfig.meta.roles.filter((x: never) => profileRoles.includes(x));
+          const matchingRoles: string[] = navConfig.meta.roles.filter((x) => profileRoles.includes(x));
           userHasMatchingRoles = matchingRoles.length > 0 ? true : false;
         }
 
         if(options.allRoutes && options.roles && options.roles.length > 0 && profileRoles.length > 0) {
-          // const matchingRoles = [...new Set(options.roles)].filter(x => new Set(profileRoles).has(x));
           const matchingRoles: string[] = options.roles.filter((x) => profileRoles.includes(x));
           userHasMatchingRoles = matchingRoles.length > 0 ? true : false;
         }
@@ -88,7 +72,12 @@ const routeGuard = (options: pluginOptions, siteData, router: VueRouter) => {
       if(userHasMatchingRoles) {
         next();
       } else {
-        router.push('/unauthorized');
+        if (options.unauthorizedRoute) {
+          router.push(options.unauthorizedRoute);
+        } else {
+          router.push('/404');
+
+        }
       }
 
     }

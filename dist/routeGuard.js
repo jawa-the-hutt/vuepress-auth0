@@ -9,7 +9,6 @@ var isCallback = function (route, cbURL, base) {
     return cbPath === routeFullPath;
 };
 var routeGuard = function (options, siteData, router) {
-    console.log('options - ', options);
     var authService = new AuthService(options, router);
     var base = siteData.base;
     var nav = siteData.themeConfig.nav;
@@ -73,7 +72,12 @@ var routeGuard = function (options, siteData, router) {
                             next();
                         }
                         else {
-                            router.push('/unauthorized');
+                            if (options.unauthorizedRoute) {
+                                router.push(options.unauthorizedRoute);
+                            }
+                            else {
+                                router.push('/404');
+                            }
                         }
                     }
                     _a.label = 8;

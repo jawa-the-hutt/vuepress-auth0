@@ -8,6 +8,7 @@ export interface pluginOptions {
     responseType?: string;
     allRoutes?: boolean;
     roles?: string[];
+    unauthorizedRoute?: string;
 }
 export interface customState {
     target: string;

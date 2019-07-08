@@ -12,7 +12,6 @@ const enhancer = ({
   isServer, // true if is being server rendered
 }) => {
   if (isServer) return;
-  // // console.log('siteData - ', siteData);
 
   const beforeRouteHandler: Function = routeGuard(OPTIONS, siteData, router);
   router.beforeEach(beforeRouteHandler);
