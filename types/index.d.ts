@@ -1,1 +1,1 @@
-declare const path: any;
+export {};

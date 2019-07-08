@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es5",
     "outDir": "dist",
     "module": "esnext",
     "strict": true,
@@ -10,7 +10,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "baseUrl": ".",
     "resolveJsonModule": true,
     "declaration": true,
@@ -19,25 +19,21 @@
     "strictNullChecks": true,
     "noImplicitAny": false,
     "removeComments": true,
+    "emitDecoratorMetadata": true,
     "types": [
       "node",
       "jest",
       "auth0-js"
     ],
-    "paths": {
-      "@/*": [
-        "lib/*"
-      ]
-    },
     "lib": [
-      "esnext",
       "dom",
-      "dom.iterable",
-      "scripthost"
+      "es6",
+      "es2017",
+      "esnext.asynciterable"
     ]
   },
   "include": [
-    "lib/**/*",
+    "src/**/*",
   ],
   "exclude": [
     "node_modules",

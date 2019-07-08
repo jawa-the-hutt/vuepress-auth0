@@ -9,7 +9,7 @@ module.exports = {
     es6: true
   },
 
-	parser: 'babel-eslint',
+	parser: '@typescript-eslint/parser',
 	parserOptions: {
 		parser: '@typescript-eslint/parser',
 		ecmaVersion: 2017,
@@ -19,14 +19,18 @@ module.exports = {
 
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    "plugin:@typescript-eslint/recommended",
     'prettier',
     'prettier/@typescript-eslint'
   ],
 
 
 	// https://eslint.org/docs/user-guide/configuring#configuring-plugins
-	plugins: ['@typescript-eslint'],
+	plugins: [
+    '@typescript-eslint',
+    'prettier'
+  ],
 
 	"rules": {
 		"import/extensions": 0,
@@ -53,7 +57,9 @@ module.exports = {
 		],
 		"@typescript-eslint/no-empty-interface": 1,
     // https://github.com/typescript-eslint/typescript-eslint/issues/103
-    "@typescript-eslint/no-parameter-properties": 0
+    "@typescript-eslint/no-parameter-properties": 0,
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "off"
 	},
 
 }

@@ -1,9 +1,11 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const path = require('path');
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-module.exports = (options, context) => ({
-  enhanceAppFiles: [path.resolve(__dirname, './lib/enhancer.js')],
+const path = require('path');
+import { pluginOptions } from './types';
+
+module.exports = (options: pluginOptions, context) => ({
+  enhanceAppFiles: [path.resolve(__dirname, './enhancer.js')],
   clientDynamicModules: () => ({
     name: 'vuepress-auth0',
     content: `export const OPTIONS = ${JSON.stringify(options)}`,

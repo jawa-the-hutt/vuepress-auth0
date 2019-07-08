@@ -1,10 +1,8 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-const { _options } = require('@dynamic/vuepress-auth0');
-const routeGuard = require('./routeGuard').default;
-
-
+const { OPTIONS } = require('@dynamic/vuepress-auth0');
+import routeGuard from './routeGuard';
 
 const enhancer = ({
   Vue, // the version of Vue being used in the VuePress app
@@ -16,7 +14,7 @@ const enhancer = ({
   if (isServer) return;
   // // console.log('siteData - ', siteData);
 
-  const beforeRouteHandler = routeGuard(_options, siteData, router);
+  const beforeRouteHandler: Function = routeGuard(OPTIONS, siteData, router);
   router.beforeEach(beforeRouteHandler);
 };
 

@@ -1,18 +1,21 @@
 /// <reference types="node" />
-import { Auth0UserProfile, Auth0DecodedHash } from "auth0-js";
+import { Auth0DecodedHash } from "auth0-js";
 import { EventEmitter } from "events";
-declare class AuthService extends EventEmitter {
-    idToken?: string;
-    profile?: Auth0UserProfile;
-    expiresIn?: number;
-    login(customState: string): void;
+import { pluginOptions, customState, ExtendedAuth0UserProfile } from './types';
+import VueRouter from 'vue-router';
+export default class AuthService extends EventEmitter {
+    private auth0;
+    private router;
+    private idToken;
+    profile: ExtendedAuth0UserProfile | undefined;
+    private expiresIn;
+    constructor(options: pluginOptions, router: VueRouter);
+    login(customState: customState): void;
     logOut(): void;
     handleAuthentication(): Promise<string>;
     isAuthenticated(): boolean;
     isIdTokenValid(): boolean;
     getIdToken(): Promise<string>;
-    setSession(authResult: any): void;
-    renewTokens(): Promise<Auth0DecodedHash>;
+    setSession(authResult: Auth0DecodedHash): void;
+    renewTokens(): Promise<unknown>;
 }
-declare const authService: AuthService;
-export default authService;
