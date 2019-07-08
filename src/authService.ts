@@ -105,8 +105,6 @@ export default class AuthService extends EventEmitter {
   setSession(authResult: Auth0DecodedHash): void {
     this.idToken = authResult.idToken;
     this.profile = authResult.idTokenPayload;
-    console.log('this.profile - ', this.profile);
-    console.log('authResult - ', authResult);
 
     // Convert the expiry time from seconds to milliseconds,
     // required by the Date constructor
