@@ -40,7 +40,9 @@ export default class AuthService extends EventEmitter {
   }
 
   logOut(): void {
-    localStorage.removeItem(localStorageKey);
+    if(isBrowser) {
+      localStorage.removeItem(localStorageKey);
+    }
 
     this.idToken = undefined;
     this.expiresIn = 0;
@@ -80,7 +82,8 @@ export default class AuthService extends EventEmitter {
   }
 
   isAuthenticated(): boolean {
-    if ( this.expiresIn && (Date.now() < this.expiresIn) && localStorage.getItem(localStorageKey) === "true") {
+
+    if ( isBrowser && this.expiresIn && (Date.now() < this.expiresIn) && localStorage.getItem(localStorageKey) === "true") {
       return true;
     } else {
       // this.logOut();
@@ -89,7 +92,7 @@ export default class AuthService extends EventEmitter {
   }
 
   isIdTokenValid(): boolean {
-    if ( this.expiresIn && this.idToken && (Date.now() < this.expiresIn)) {
+    if ( isBrowser && this.expiresIn && this.idToken && (Date.now() < this.expiresIn)) {
       return true;
     } else {
       return false;
@@ -116,11 +119,11 @@ export default class AuthService extends EventEmitter {
 
     // Convert the expiry time from seconds to milliseconds,
     // required by the Date constructor
-    if(this.profile && this.profile.exp ) {
+    if(isBrowser && this.profile && this.profile.exp ) {
       this.expiresIn = (this.profile.exp * 1000) + Date.now();  // new Date(this.profile.exp * 1000);
       localStorage.setItem(localStorageKey, "true");
       this.router.push(authResult.appState.target)
-    } else if (authResult.expiresIn) {
+    } else if (isBrowser && authResult.expiresIn) {
       this.expiresIn = authResult.expiresIn * 1000 + Date.now();
       localStorage.setItem(localStorageKey, "true");
       this.router.push(authResult.appState.target)
@@ -136,11 +139,11 @@ export default class AuthService extends EventEmitter {
 
   renewTokens() {
     return new Promise((resolve, reject) => {
-      if (localStorage.getItem(localStorageKey) !== "true") {
+      if (isBrowser && localStorage.getItem(localStorageKey) !== "true") {
         return reject("Not logged in");
       }
 
-        if(this.auth0 instanceof WebAuth) {
+      if(this.auth0 instanceof WebAuth) {
         this.auth0.checkSession({}, (err, authResult) => {
           if (err) {
             reject(err);

@@ -22,7 +22,9 @@ var AuthService = (function (_super) {
         }
     };
     AuthService.prototype.logOut = function () {
-        localStorage.removeItem(localStorageKey);
+        if (isBrowser) {
+            localStorage.removeItem(localStorageKey);
+        }
         this.idToken = undefined;
         this.expiresIn = 0;
         this.profile = undefined;
@@ -53,7 +55,7 @@ var AuthService = (function (_super) {
         });
     };
     AuthService.prototype.isAuthenticated = function () {
-        if (this.expiresIn && (Date.now() < this.expiresIn) && localStorage.getItem(localStorageKey) === "true") {
+        if (isBrowser && this.expiresIn && (Date.now() < this.expiresIn) && localStorage.getItem(localStorageKey) === "true") {
             return true;
         }
         else {
@@ -61,7 +63,7 @@ var AuthService = (function (_super) {
         }
     };
     AuthService.prototype.isIdTokenValid = function () {
-        if (this.expiresIn && this.idToken && (Date.now() < this.expiresIn)) {
+        if (isBrowser && this.expiresIn && this.idToken && (Date.now() < this.expiresIn)) {
             return true;
         }
         else {
@@ -87,12 +89,12 @@ var AuthService = (function (_super) {
     AuthService.prototype.setSession = function (authResult) {
         this.idToken = authResult.idToken;
         this.profile = authResult.idTokenPayload;
-        if (this.profile && this.profile.exp) {
+        if (isBrowser && this.profile && this.profile.exp) {
             this.expiresIn = (this.profile.exp * 1000) + Date.now();
             localStorage.setItem(localStorageKey, "true");
             this.router.push(authResult.appState.target);
         }
-        else if (authResult.expiresIn) {
+        else if (isBrowser && authResult.expiresIn) {
             this.expiresIn = authResult.expiresIn * 1000 + Date.now();
             localStorage.setItem(localStorageKey, "true");
             this.router.push(authResult.appState.target);
@@ -103,7 +105,7 @@ var AuthService = (function (_super) {
     AuthService.prototype.renewTokens = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            if (localStorage.getItem(localStorageKey) !== "true") {
+            if (isBrowser && localStorage.getItem(localStorageKey) !== "true") {
                 return reject("Not logged in");
             }
             if (_this.auth0 instanceof WebAuth) {
