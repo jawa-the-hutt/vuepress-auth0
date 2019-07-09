@@ -5,6 +5,8 @@ import AuthService from './authService';
 import VueRouter, { Route } from 'vue-router';
 import { pluginOptions } from './types';
 
+// // const isBrowser = typeof window !== "undefined" ? true : false;
+
 const isCallback = (route: Route, cbURL: string, base: string) => {
   const cbURI = URI(cbURL);
   const cbPath: string = cbURI.path();
@@ -81,7 +83,7 @@ const routeGuard = (options: pluginOptions, siteData, router: VueRouter) => {
       }
 
     }
-  };
+  }
 };
 
 export default routeGuard;

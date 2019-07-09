@@ -1,13 +1,20 @@
 import * as tslib_1 from "tslib";
-import { WebAuth } from "auth0-js";
 import { EventEmitter } from "events";
 var localStorageKey = "loggedIn";
-var isBrowser = typeof window !== "undefined";
+var isBrowser = typeof window !== "undefined" ? true : false;
+var WebAuth;
+if (isBrowser) {
+    WebAuth = require('auth0-js').WebAuth;
+}
+else {
+    WebAuth = {};
+}
 var AuthService = (function (_super) {
     tslib_1.__extends(AuthService, _super);
     function AuthService(options, router) {
         var _this = _super.call(this) || this;
-        _this.auth0 = isBrowser ? new WebAuth(tslib_1.__assign({ responseType: 'id_token', scope: 'openid profile email' }, options)) : {};
+        _this.auth0 =
+            new WebAuth(tslib_1.__assign({ responseType: 'id_token', scope: 'openid profile email' }, options));
         _this.router = router;
         _this.idToken = undefined;
         _this.profile = undefined;

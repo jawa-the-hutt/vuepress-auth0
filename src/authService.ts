@@ -1,16 +1,27 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Auth0DecodedHash, WebAuth, AuthorizeOptions } from "auth0-js";
+import { Auth0DecodedHash, AuthorizeOptions } from "auth0-js";
 import { EventEmitter } from "events";
 import { pluginOptions, customState, ExtendedAuth0UserProfile } from './types';
 import VueRouter from 'vue-router';
 
 const localStorageKey: string = "loggedIn";
 // // // const loginEvent = "loginEvent";
-const isBrowser = typeof window !== "undefined";
+const isBrowser = typeof window !== "undefined" ? true : false;
+let WebAuth;
+
+// only import WebAuth if we're in a browser
+// The reason for this is some build systems will error
+// out with 'window is not defined' if we don't make
+// sure we're in a browser first.
+if(isBrowser) {
+  WebAuth = require('auth0-js').WebAuth;
+} else  {
+  WebAuth = {};
+}
 
 export default class AuthService extends EventEmitter {
 
-  private auth0: WebAuth | {};
+  private auth0; // WebAuth | {};
   private router;
   private idToken!: string | undefined;
   public profile!: ExtendedAuth0UserProfile | undefined;
@@ -19,11 +30,12 @@ export default class AuthService extends EventEmitter {
   constructor(options: pluginOptions, router: VueRouter) {
     super();
 
-    this.auth0 = isBrowser ? new WebAuth({
+    this.auth0 = // isBrowser ?
+    new WebAuth({
       responseType: 'id_token',
       scope: 'openid profile email',
       ...options
-    }) : {};
+    }) // : {};
 
     this.router = router;
     this.idToken = undefined;
