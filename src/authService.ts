@@ -6,10 +6,11 @@ import VueRouter from 'vue-router';
 
 const localStorageKey: string = "loggedIn";
 // // // const loginEvent = "loginEvent";
+const isBrowser = typeof window !== "undefined";
 
 export default class AuthService extends EventEmitter {
 
-  private auth0: WebAuth;
+  private auth0: WebAuth | {};
   private router;
   private idToken!: string | undefined;
   public profile!: ExtendedAuth0UserProfile | undefined;
@@ -17,11 +18,12 @@ export default class AuthService extends EventEmitter {
 
   constructor(options: pluginOptions, router: VueRouter) {
     super();
-    this.auth0 = new WebAuth({
+
+    this.auth0 = isBrowser ? new WebAuth({
       responseType: 'id_token',
       scope: 'openid profile email',
       ...options
-    });
+    }) : {};
 
     this.router = router;
     this.idToken = undefined;
@@ -30,9 +32,11 @@ export default class AuthService extends EventEmitter {
   }
 
   login(customState: customState): void {
-    this.auth0.authorize({
-      appState: customState
-    } as AuthorizeOptions);
+    if(this.auth0 instanceof WebAuth) {
+      this.auth0.authorize({
+        appState: customState
+      } as AuthorizeOptions);
+    }
   }
 
   logOut(): void {
@@ -42,32 +46,36 @@ export default class AuthService extends EventEmitter {
     this.expiresIn = 0;
     this.profile = undefined;
 
-    this.auth0.logout({
-      returnTo: `${window.location.origin}`
-    });
+    if(this.auth0 instanceof WebAuth) {
+      this.auth0.logout({
+        returnTo: `${window.location.origin}`
+      });
+    }
 
     // // this.emit(loginEvent, { loggedIn: false });
   }
 
   handleAuthentication(): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.auth0.parseHash((err, authResult) => {
-        if (err) {
-          // // this.emit(loginEvent, {
-          // //   loggedIn: false,
-          // //   error: err,
-          // //   errorMsg: err.statusText
-          // // });
-          reject(err);
-        } else {
-          if (authResult !== null) {
-            this.setSession(authResult);
-            if (authResult.idToken) {
-              resolve(authResult.idToken);
+      if(this.auth0 instanceof WebAuth) {
+        this.auth0.parseHash((err, authResult) => {
+          if (err) {
+            // // this.emit(loginEvent, {
+            // //   loggedIn: false,
+            // //   error: err,
+            // //   errorMsg: err.statusText
+            // // });
+            reject(err);
+          } else {
+            if (authResult !== null) {
+              this.setSession(authResult);
+              if (authResult.idToken) {
+                resolve(authResult.idToken);
+              }
             }
           }
-        }
-      });
+        });
+      }
     });
   }
 
@@ -132,14 +140,16 @@ export default class AuthService extends EventEmitter {
         return reject("Not logged in");
       }
 
-      this.auth0.checkSession({}, (err, authResult) => {
-        if (err) {
-          reject(err);
-        } else {
-          this.setSession(authResult);
-          resolve(authResult);
-        }
-      });
+        if(this.auth0 instanceof WebAuth) {
+        this.auth0.checkSession({}, (err, authResult) => {
+          if (err) {
+            reject(err);
+          } else {
+            this.setSession(authResult);
+            resolve(authResult);
+          }
+        });
+      }
     });
   }
 }

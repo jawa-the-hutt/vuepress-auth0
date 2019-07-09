@@ -2,11 +2,12 @@ import * as tslib_1 from "tslib";
 import { WebAuth } from "auth0-js";
 import { EventEmitter } from "events";
 var localStorageKey = "loggedIn";
+var isBrowser = typeof window !== "undefined";
 var AuthService = (function (_super) {
     tslib_1.__extends(AuthService, _super);
     function AuthService(options, router) {
         var _this = _super.call(this) || this;
-        _this.auth0 = new WebAuth(tslib_1.__assign({ responseType: 'id_token', scope: 'openid profile email' }, options));
+        _this.auth0 = isBrowser ? new WebAuth(tslib_1.__assign({ responseType: 'id_token', scope: 'openid profile email' }, options)) : {};
         _this.router = router;
         _this.idToken = undefined;
         _this.profile = undefined;
@@ -14,35 +15,41 @@ var AuthService = (function (_super) {
         return _this;
     }
     AuthService.prototype.login = function (customState) {
-        this.auth0.authorize({
-            appState: customState
-        });
+        if (this.auth0 instanceof WebAuth) {
+            this.auth0.authorize({
+                appState: customState
+            });
+        }
     };
     AuthService.prototype.logOut = function () {
         localStorage.removeItem(localStorageKey);
         this.idToken = undefined;
         this.expiresIn = 0;
         this.profile = undefined;
-        this.auth0.logout({
-            returnTo: "" + window.location.origin
-        });
+        if (this.auth0 instanceof WebAuth) {
+            this.auth0.logout({
+                returnTo: "" + window.location.origin
+            });
+        }
     };
     AuthService.prototype.handleAuthentication = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            _this.auth0.parseHash(function (err, authResult) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    if (authResult !== null) {
-                        _this.setSession(authResult);
-                        if (authResult.idToken) {
-                            resolve(authResult.idToken);
+            if (_this.auth0 instanceof WebAuth) {
+                _this.auth0.parseHash(function (err, authResult) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        if (authResult !== null) {
+                            _this.setSession(authResult);
+                            if (authResult.idToken) {
+                                resolve(authResult.idToken);
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         });
     };
     AuthService.prototype.isAuthenticated = function () {
@@ -99,15 +106,17 @@ var AuthService = (function (_super) {
             if (localStorage.getItem(localStorageKey) !== "true") {
                 return reject("Not logged in");
             }
-            _this.auth0.checkSession({}, function (err, authResult) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    _this.setSession(authResult);
-                    resolve(authResult);
-                }
-            });
+            if (_this.auth0 instanceof WebAuth) {
+                _this.auth0.checkSession({}, function (err, authResult) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        _this.setSession(authResult);
+                        resolve(authResult);
+                    }
+                });
+            }
         });
     };
     return AuthService;
