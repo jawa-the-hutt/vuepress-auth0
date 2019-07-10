@@ -17,5 +17,5 @@ export default class AuthService extends EventEmitter {
     isIdTokenValid(): boolean;
     getIdToken(): Promise<string>;
     setSession(authResult: Auth0DecodedHash): void;
-    renewTokens(): Promise<unknown>;
+    renewTokens(): Promise<any>;
 }

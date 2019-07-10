@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+
 import { Auth0DecodedHash, AuthorizeOptions } from "auth0-js";
 import { EventEmitter } from "events";
 import { pluginOptions, customState, ExtendedAuth0UserProfile } from './types';
 import VueRouter from 'vue-router';
 
 const localStorageKey: string = "loggedIn";
-// // // const loginEvent = "loginEvent";
+// // // // const loginEvent = "loginEvent";
+
 const isBrowser = typeof window !== "undefined" ? true : false;
 let WebAuth;
 
@@ -21,7 +23,7 @@ if(isBrowser) {
 
 export default class AuthService extends EventEmitter {
 
-  private auth0; // WebAuth | {};
+  private auth0;
   private router;
   private idToken!: string | undefined;
   public profile!: ExtendedAuth0UserProfile | undefined;
@@ -30,12 +32,11 @@ export default class AuthService extends EventEmitter {
   constructor(options: pluginOptions, router: VueRouter) {
     super();
 
-    this.auth0 = // isBrowser ?
-    new WebAuth({
+    this.auth0 = new WebAuth({
       responseType: 'id_token',
       scope: 'openid profile email',
       ...options
-    }) // : {};
+    })
 
     this.router = router;
     this.idToken = undefined;
@@ -44,98 +45,107 @@ export default class AuthService extends EventEmitter {
   }
 
   login(customState: customState): void {
-    if(this.auth0 instanceof WebAuth) {
-      this.auth0.authorize({
-        appState: customState
-      } as AuthorizeOptions);
+    if(!isBrowser || (Object.entries(this.auth0).length === 0 && this.auth0.constructor === Object)) {
+      return;
     }
+
+    this.auth0.authorize({
+      appState: customState
+    } as AuthorizeOptions);
   }
 
   logOut(): void {
-    if(isBrowser) {
-      localStorage.removeItem(localStorageKey);
+    if(!isBrowser || (Object.entries(this.auth0).length === 0 && this.auth0.constructor === Object)) {
+      return;
     }
 
+    localStorage.removeItem(localStorageKey);
     this.idToken = undefined;
     this.expiresIn = 0;
     this.profile = undefined;
 
-    if(this.auth0 instanceof WebAuth) {
-      this.auth0.logout({
-        returnTo: `${window.location.origin}`
-      });
-    }
+    this.auth0.logout({
+      returnTo: `${window.location.origin}`
+    });
 
     // // this.emit(loginEvent, { loggedIn: false });
   }
 
-  handleAuthentication(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      if(this.auth0 instanceof WebAuth) {
-        this.auth0.parseHash((err, authResult) => {
-          if (err) {
-            // // this.emit(loginEvent, {
-            // //   loggedIn: false,
-            // //   error: err,
-            // //   errorMsg: err.statusText
-            // // });
-            reject(err);
-          } else {
-            if (authResult !== null) {
-              this.setSession(authResult);
-              if (authResult.idToken) {
-                resolve(authResult.idToken);
-              }
+  async handleAuthentication(): Promise<string> {
+      if(!isBrowser || Object.entries(this.auth0).length === 0 && this.auth0.constructor === Object) {
+        return('error');
+      }
+
+      return this.auth0.parseHash((err, authResult) => {
+        if (err) {
+          // // this.emit(loginEvent, {
+          // //   loggedIn: false,
+          // //   error: err,
+          // //   errorMsg: err.statusText
+          // // });
+          return(err);
+        } else {
+          if (authResult !== null) {
+            this.setSession(authResult);
+            if (authResult.idToken) {
+              return(authResult.idToken);
             }
           }
-        });
-      }
-    });
+        }
+      });
   }
 
   isAuthenticated(): boolean {
+    if(!isBrowser || (Object.entries(this.auth0).length === 0 && this.auth0.constructor === Object)) {
+      return false;
+    }
 
-    if ( isBrowser && this.expiresIn && (Date.now() < this.expiresIn) && localStorage.getItem(localStorageKey) === "true") {
+    if (this.expiresIn && (Date.now() < this.expiresIn) && localStorage.getItem(localStorageKey) === "true") {
       return true;
     } else {
-      // this.logOut();
       return false;
     }
   }
 
   isIdTokenValid(): boolean {
-    if ( isBrowser && this.expiresIn && this.idToken && (Date.now() < this.expiresIn)) {
+    if(!isBrowser || (Object.entries(this.auth0).length === 0 && this.auth0.constructor === Object)) {
+      return false;
+    }
+
+    if (this.expiresIn && this.idToken && (Date.now() < this.expiresIn)) {
       return true;
     } else {
       return false;
     }
   }
 
-  getIdToken(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      if (this.isIdTokenValid()) {
-        resolve(this.idToken);
+  async getIdToken(): Promise<string> {
+      if (this.idToken && this.isIdTokenValid()) {
+        return(this.idToken);
       } else if (this.isAuthenticated()) {
-        this.renewTokens().then((authResult: any) => {
-          resolve(authResult.idToken);
-        }, reject);
+        return await this.renewTokens().then((authResult: any) => {
+          return(authResult.idToken);
+        });
       } else {
-        resolve();
+        return 'error getting idToken';
       }
-    });
   }
 
   setSession(authResult: Auth0DecodedHash): void {
+    if(!isBrowser || (Object.entries(this.auth0).length === 0 && this.auth0.constructor === Object)) {
+      return;
+    }
+
     this.idToken = authResult.idToken;
     this.profile = authResult.idTokenPayload;
 
     // Convert the expiry time from seconds to milliseconds,
     // required by the Date constructor
-    if(isBrowser && this.profile && this.profile.exp ) {
-      this.expiresIn = (this.profile.exp * 1000) + Date.now();  // new Date(this.profile.exp * 1000);
+    if(this.profile && this.profile.exp ) {
+      this.expiresIn = (this.profile.exp * 1000) + Date.now();
       localStorage.setItem(localStorageKey, "true");
       this.router.push(authResult.appState.target)
-    } else if (isBrowser && authResult.expiresIn) {
+    } else if (authResult.expiresIn) {
       this.expiresIn = authResult.expiresIn * 1000 + Date.now();
       localStorage.setItem(localStorageKey, "true");
       this.router.push(authResult.appState.target)
@@ -149,21 +159,21 @@ export default class AuthService extends EventEmitter {
     // });
   }
 
-  renewTokens() {
-    return new Promise((resolve, reject) => {
-      if (isBrowser && localStorage.getItem(localStorageKey) !== "true") {
-        return reject("Not logged in");
-      }
+  async renewTokens(): Promise<any> {
+    if(!isBrowser || (Object.entries(this.auth0).length === 0 && this.auth0.constructor === Object)) {
+      return;
+    }
 
-      if(this.auth0 instanceof WebAuth) {
-        this.auth0.checkSession({}, (err, authResult) => {
-          if (err) {
-            reject(err);
-          } else {
-            this.setSession(authResult);
-            resolve(authResult);
-          }
-        });
+    if (localStorage.getItem(localStorageKey) !== "true") {
+      return ("Not logged in");
+    }
+
+    return this.auth0.checkSession({}, (err, authResult) => {
+      if (err) {
+        return(err);
+      } else {
+        this.setSession(authResult);
+        return(authResult);
       }
     });
   }

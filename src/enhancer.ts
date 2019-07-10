@@ -13,7 +13,7 @@ const enhancer = ({
 }) => {
   if (isServer) return;
 
-  const beforeRouteHandler: Function = routeGuard(OPTIONS, siteData, router);
+  const beforeRouteHandler: Function = routeGuard(OPTIONS, siteData, router, Vue);
   router.beforeEach(beforeRouteHandler);
 };
 

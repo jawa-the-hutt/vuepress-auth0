@@ -1,4 +1,5 @@
 import { Auth0UserProfile } from "auth0-js";
+import Router from 'vue-router';
 
 export interface pluginOptions {
   domain: string;
@@ -9,7 +10,7 @@ export interface pluginOptions {
   responseType?: string;
   allRoutes?: boolean;
   roles?: string[];
-  unauthorizedRoute?: string;
+  unauthorizedRoute?: string
 }
 
 export interface customState {

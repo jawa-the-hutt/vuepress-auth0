@@ -10,7 +10,37 @@ If the user is not authorized to view a page/route, then by default they will be
 npm install --save vuepress-auth0
 ```
 
-Then, in your vuepress `config.js` file, add the following:
+In your `.vuepress/components` directory, create a component named `Callback.vue` and add the following code:
+
+```html
+<template>
+  <p>Checking Authentication...</p>
+</template>
+
+<script>
+export default {
+  async beforeMount() {
+    // Process the auth tokens
+    const handleAuth = await this.$auth.handleAuthentication();
+  }
+}
+</script>
+```
+
+In the root documentation directory, `/docs` for example, create a file named `callback.md` and in it, add the following markdown:
+
+```md---
+home: false
+navbar: false
+sidebar: false
+---
+
+<Callback/>
+```
+
+These two files working together will give you a callback URL that is also SSR friendly.
+
+After that in your vuepress `config.js` file, add the following:
 
 ```js
 const Auth = require('vuepress-auth0');
@@ -22,16 +52,16 @@ module.exports = {
       text: 'Home',
       link: '/',
       meta: {
-        auth: true                                        // The meta tag is required to let the plugin know you want to secure this nav route.
+        auth: true                                                // The meta tag is required to let the plugin know you want to secure this nav route.
       }
     },
     // rest of your nav config goes here
   ],
   plugins: [
     [Auth, {
-      domain: 'https://example.auth0.com',                // Substitute your actual Auth0 domain.  Custom domains should work as well
-      redirectUri: 'https://example.auth0.com/callback',  // Substitute the callback URL in your specific Application Config in the Auth0 portal
-      clientID: 'sdf2345234fgdf345vsfkdid843kjf89fcie8',  // Substitute your actual Client Id
+      domain: 'https://example.auth0.com',                        // Substitute your actual Auth0 domain.  Custom domains should work as well
+      redirectUri: 'https://example.auth0.com/callback.html',     // Substitute the callback URL domain in your specific Application Config in the Auth0 portal. Make sure this url ends in `callback.html`
+      clientID: 'sdf2345234fgdf345vsfkdid843kjf89fcie8',          // Substitute your actual Client Id
     }],
   ]
 }
@@ -62,9 +92,9 @@ module.exports = {
   plugins: [
     [Auth, {
       domain: 'https://example.auth0.com',
-      redirectUri: 'https://example.auth0.com/callback',
+      redirectUri: 'https://example.auth0.com/callback.html',
       clientID: 'sdf2345234fgdf345vsfkdid843kjf89fcie8',
-      allRoutes: true                                     // Settting to true will secure all pages/routes
+      allRoutes: true     // Settting to true will secure all pages/routes
     }],
   ]
 }
@@ -96,7 +126,7 @@ module.exports = {
   plugins: [
     [Auth, {
       domain: 'https://example.auth0.com',
-      redirectUri: 'https://example.auth0.com/callback',
+      redirectUri: 'https://example.auth0.com/callback.html',
       clientID: 'sdf2345234fgdf345vsfkdid843kjf89fcie8',
       allRoutes: true,
       namespace: 'https://example.com/',
@@ -131,7 +161,7 @@ module.exports = {
   plugins: [
     [Auth, {
       domain: 'https://example.auth0.com',
-      redirectUri: 'https://example.auth0.com/callback',
+      redirectUri: 'https://example.auth0.com/callback.html',
       clientID: 'sdf2345234fgdf345vsfkdid843kjf89fcie8',
       namespace: 'https://example.com/'
     }],

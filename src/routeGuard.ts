@@ -5,8 +5,6 @@ import AuthService from './authService';
 import VueRouter, { Route } from 'vue-router';
 import { pluginOptions } from './types';
 
-// // const isBrowser = typeof window !== "undefined" ? true : false;
-
 const isCallback = (route: Route, cbURL: string, base: string) => {
   const cbURI = URI(cbURL);
   const cbPath: string = cbURI.path();
@@ -14,8 +12,10 @@ const isCallback = (route: Route, cbURL: string, base: string) => {
   return cbPath === routeFullPath;
 }
 
-const routeGuard = (options: pluginOptions, siteData, router: VueRouter) => {
+const routeGuard = (options: pluginOptions, siteData, router: VueRouter, Vue: any) => {
   const authService: AuthService = new AuthService(options, router);
+  Vue.prototype.$auth = authService;
+
   const { base } = siteData;
   const { nav } = siteData.themeConfig;
 
@@ -54,19 +54,15 @@ const routeGuard = (options: pluginOptions, siteData, router: VueRouter) => {
     }
 
     if (isCallback(to, options.redirectUri, base) && !authState) {
-      try {
-        await authService.handleAuthentication();
-      } catch (e) {
-        router.push(base);
-        console.error(e);
-      }
-    } else if (!authState) {  // we are not authenticated
+      next();
+    } else
+    if (!authState) {         // we are not authenticated
       if (routeNeedsAuth) {   // the route requires authentication
         authService.login({ target: to.path });
       } else {                // the route DOES NOT require authentication
         next();
       }
-    } else { // we are authenticated
+    } else {                  // we are authenticated
       // Does the user have matching roles. Default is true which means that without any roles
       // configured, this should pass the user into the route without issues. However, if the route
       // is configured with the meta.roles tag and DOES NOT have matching roles, then it will
@@ -78,10 +74,8 @@ const routeGuard = (options: pluginOptions, siteData, router: VueRouter) => {
           router.push(options.unauthorizedRoute);
         } else {
           router.push('/404');
-
         }
       }
-
     }
   }
 };

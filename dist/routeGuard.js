@@ -8,12 +8,13 @@ var isCallback = function (route, cbURL, base) {
     var routeFullPath = URI.joinPaths(base, route.path).toString();
     return cbPath === routeFullPath;
 };
-var routeGuard = function (options, siteData, router) {
+var routeGuard = function (options, siteData, router, Vue) {
     var authService = new AuthService(options, router);
+    Vue.prototype.$auth = authService;
     var base = siteData.base;
     var nav = siteData.themeConfig.nav;
     return function (to, from, next) { return tslib_1.__awaiter(_this, void 0, void 0, function () {
-        var authState, link, linkIndex, routeNeedsAuth, userHasMatchingRoles, profileRoles, profile, navConfig, matchingRoles, matchingRoles, e_1;
+        var authState, link, linkIndex, routeNeedsAuth, userHasMatchingRoles, profileRoles, profile, navConfig, matchingRoles, matchingRoles;
         return tslib_1.__generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4, authService.isAuthenticated()];
@@ -44,22 +45,10 @@ var routeGuard = function (options, siteData, router) {
                             }
                         }
                     }
-                    if (!(isCallback(to, options.redirectUri, base) && !authState)) return [3, 7];
-                    _a.label = 3;
-                case 3:
-                    _a.trys.push([3, 5, , 6]);
-                    return [4, authService.handleAuthentication()];
-                case 4:
-                    _a.sent();
-                    return [3, 6];
-                case 5:
-                    e_1 = _a.sent();
-                    router.push(base);
-                    console.error(e_1);
-                    return [3, 6];
-                case 6: return [3, 8];
-                case 7:
-                    if (!authState) {
+                    if (isCallback(to, options.redirectUri, base) && !authState) {
+                        next();
+                    }
+                    else if (!authState) {
                         if (routeNeedsAuth) {
                             authService.login({ target: to.path });
                         }
@@ -80,8 +69,7 @@ var routeGuard = function (options, siteData, router) {
                             }
                         }
                     }
-                    _a.label = 8;
-                case 8: return [2];
+                    return [2];
             }
         });
     }); };
