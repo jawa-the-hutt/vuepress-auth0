@@ -34,22 +34,26 @@ const routeGuard = (options: pluginOptions, siteData, router: VueRouter, Vue: an
     }
 
     // Determine if the route needs to be protected with authentication
-    if (linkIndex > -1) {
-      const navConfig: any = nav[linkIndex];
-      if ((navConfig.meta && navConfig.meta.auth) || options.allRoutes) {
+    if (options.allRoutes || linkIndex > -1) {
+      if (linkIndex > -1) {
+        const navConfig: any = nav[linkIndex];
+        if ((navConfig.meta && navConfig.meta.auth) || options.allRoutes) { 
+          routeNeedsAuth = true;
+          // Determine if user uas matching roles for the route. If not, they will not be
+          // allowed to navigate to the route
+          if(!options.allRoutes && navConfig.meta.roles && navConfig.meta.roles.length > 0 && profileRoles.length > 0) {
+            const matchingRoles: string[] = navConfig.meta.roles.filter((x) => profileRoles.includes(x));
+            userHasMatchingRoles = matchingRoles.length > 0 ? true : false;
+          }
+  
+          if(options.allRoutes && options.roles && options.roles.length > 0 && profileRoles.length > 0) {
+            const matchingRoles: string[] = options.roles.filter((x) => profileRoles.includes(x));
+            userHasMatchingRoles = matchingRoles.length > 0 ? true : false;
+          }
+        }
+      }
+      else {
         routeNeedsAuth = true;
-        // Determine if user uas matching roles for the route. If not, they will not be
-        // allowed to navigate to the route
-        if(!options.allRoutes && navConfig.meta.roles && navConfig.meta.roles.length > 0 && profileRoles.length > 0) {
-          const matchingRoles: string[] = navConfig.meta.roles.filter((x) => profileRoles.includes(x));
-          userHasMatchingRoles = matchingRoles.length > 0 ? true : false;
-        }
-
-        if(options.allRoutes && options.roles && options.roles.length > 0 && profileRoles.length > 0) {
-          const matchingRoles: string[] = options.roles.filter((x) => profileRoles.includes(x));
-          userHasMatchingRoles = matchingRoles.length > 0 ? true : false;
-        }
-
       }
     }
 
